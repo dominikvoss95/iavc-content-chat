@@ -1,0 +1,15 @@
+venv/
+env/
+.env
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+.pytest_cache/
+.agents/
+.git/
+.gitignore
+AGENTS.md
+specs.md
+antigravity.md
+tests/

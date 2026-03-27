@@ -239,7 +239,8 @@ def generate_answer(state: IAVCGraphState) -> Dict[str, Any]:
     
     # Talk to local Ollama
     try:
-        llm = ChatOllama(model="phi3", temperature=0) # ensure you have llama3 pulled
+        ollama_base_url = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+        llm = ChatOllama(model="phi3", temperature=0, base_url=ollama_base_url)
         
         prompt = ChatPromptTemplate.from_template("""
         Du bist ein hilfreicher Assistent für die Website IAVC World. 

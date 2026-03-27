@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: iavc-content-agent
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount the database file so we don't lose the crawled data when the container stops
+      - ./iavc_knowledge.db:/app/iavc_knowledge.db
+    environment:
+      # If using Ollama on the host machine (Mac/Linux), you might need to use host.docker.internal 
+      # or adjust the network so the container can reach your local Ollama port 11434.
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    restart: unless-stopped
+    # Depending on OS, this might be needed for host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
