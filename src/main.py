@@ -1,6 +1,7 @@
 import os
 import time
 import uuid
+import logging
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Security, Request
 from fastapi.security import APIKeyHeader
@@ -8,6 +9,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from src.graph import build_ingestion_graph, build_query_graph
+
+# --- Setup Logging ---
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger("IAVC-API")
 
 app = FastAPI(title="IAVC World Content Chat Agent")
 
@@ -68,6 +77,8 @@ class QueryRequest(BaseModel):
 async def ingest_content(request: IngestRequest, req: Request):
     check_rate_limit(req)
     run_id = str(uuid.uuid4())
+    logger.info(f"Ingest Request {run_id}: Started for URL - {request.source_url}")
+    
     initial_state = {
         "source_identifier": str(uuid.uuid4()),
         "source_url": request.source_url,
@@ -79,19 +90,26 @@ async def ingest_content(request: IngestRequest, req: Request):
     
     try:
         final_state = ingestion_graph.invoke(initial_state)
+        chunks_indexed = len(final_state.get("chunks", []))
+        logger.info(f"Ingest Request {run_id}: Finished successfully. {chunks_indexed} chunks indexed.")
         return {
             "status": "success", 
             "run_id": run_id, 
-            "indexed_chunks": len(final_state.get("chunks", [])),
+            "indexed_chunks": chunks_indexed,
             "errors": final_state.get("error_message")
         }
     except Exception as e:
+        logger.error(f"Ingest Request {run_id}: Failed with error - {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/query", dependencies=[Security(verify_api_key)])
 async def query_content(request: QueryRequest, req: Request):
     check_rate_limit(req)
     run_id = str(uuid.uuid4())
+    
+    start_time = time.time()
+    logger.info(f"Query Request {run_id}: Received query - '{request.user_query}'")
+    
     initial_state = {
         "user_query": request.user_query,
         "top_k": request.top_k,
@@ -103,6 +121,9 @@ async def query_content(request: QueryRequest, req: Request):
     
     try:
         final_state = query_graph.invoke(initial_state)
+        duration = time.time() - start_time
+        logger.info(f"Query Request {run_id}: Answer generated in {duration:.2f}s")
+        
         return {
             "answer": final_state.get("answer_text"),
             "sources": final_state.get("answer_sources", []),
@@ -110,6 +131,7 @@ async def query_content(request: QueryRequest, req: Request):
             "generation_status": final_state.get("generation_status")
         }
     except Exception as e:
+        logger.error(f"Query Request {run_id}: Failed with error - {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 import os

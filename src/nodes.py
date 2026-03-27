@@ -1,6 +1,7 @@
 import os
 import uuid
 import datetime
+import logging
 import trafilatura
 import httpx
 from typing import Dict, Any, List
@@ -12,6 +13,7 @@ from dotenv import load_dotenv
 import src.database as db
 
 load_dotenv()
+logger = logging.getLogger("IAVC-Nodes")
 
 # Global Embedding Model Initialization (Local-only)
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -229,13 +231,15 @@ def generate_answer(state: IAVCGraphState) -> Dict[str, Any]:
     # This is helpful for testing 'ingest then immediate answer'
     source_material = chunks if chunks else state.get("chunks", [])
     
-    # Format instructions with Metadata
+    # Building context string
     context = ""
     for c in source_material[:3]:
         context += f"Titel: {c.get('article_title', 'Unbekannt')}\n"
         context += f"Datum: {c.get('published_at', 'Unbekannt')}\n"
         context += f"Firma/Autor: {c.get('firma', 'Unbekannt')}\n"
         context += f"Inhalt: {c.get('text', '')}\n\n"
+        
+    logger.info(f"Generating answer based on {len(source_material[:3])} retrieved chunks.")
     
     # Talk to local Ollama
     try:
