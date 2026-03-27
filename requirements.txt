@@ -1,0 +1,8 @@
+pytest
+langgraph
+httpx
+beautifulsoup4
+pydantic
+fastapi
+uvicorn
+sqlite-vec
