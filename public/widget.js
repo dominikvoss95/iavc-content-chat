@@ -257,7 +257,10 @@
         try {
             const res = await fetch(API_URL, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "X-API-KEY": "your-secret-api-key-here" // Match with backend
+                },
                 body: JSON.stringify({ user_query: text })
             });
             const data = await res.json();

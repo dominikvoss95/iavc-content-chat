@@ -61,9 +61,11 @@ async def ingest_article(client: httpx.AsyncClient, url: str):
     """Sends a URL to the local ingestion API."""
     print(f"\n-> Ingestion started for: {url}")
     try:
+        headers = {"X-API-KEY": "your-secret-api-key-here"}
         response = await client.post(
             INGEST_API_URL, 
             json={"source_url": url, "category_name": "Crawler", "debug": False},
+            headers=headers,
             timeout=60.0
         )
         if response.status_code == 200:
