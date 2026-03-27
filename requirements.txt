@@ -1,8 +1,13 @@
 pytest
 langgraph
 httpx
-beautifulsoup4
+trafilatura
 pydantic
 fastapi
 uvicorn
 sqlite-vec
+langchain-ollama
+langchain-huggingface
+python-dotenv
+langchain-community
+sentence-transformers

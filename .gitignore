@@ -1,4 +1,22 @@
-venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
 .pytest_cache/
+
+# Databases
+*.db
+iavc_knowledge.db
+
+# Project Docs & Specs
+specs.md
+AGENTS.md
+.agents/
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store

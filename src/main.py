@@ -1,10 +1,20 @@
 import uuid
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from src.graph import build_ingestion_graph, build_query_graph
 
 app = FastAPI(title="IAVC World Content Chat Agent")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In Produktion hier "https://iavcworld.de" eintragen
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 ingestion_graph = build_ingestion_graph()
 query_graph = build_query_graph()
@@ -66,6 +76,11 @@ async def query_content(request: QueryRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+import os
+if not os.path.exists("public"):
+    os.makedirs("public")
+app.mount("/public", StaticFiles(directory="public"), name="public")
 
 if __name__ == "__main__":
     import uvicorn

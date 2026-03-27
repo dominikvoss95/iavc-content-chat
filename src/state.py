@@ -6,9 +6,11 @@ class ArticleChunk(TypedDict, total=False):
     article_title: str
     article_category: str
     published_at: str
+    firma: str  # Added Firma Field
     text: str
     embedding_id: str
     score: float
+
 
 class IAVCGraphState(TypedDict, total=False):
     # Ingestion Graph Input
